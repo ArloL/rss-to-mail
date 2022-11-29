@@ -1,12 +1,9 @@
-# ${PROJECT}
+# rss-to-mail
 
-Short description
+Read from RSS feeds and send an email for every new item.
 
-# Quickstart
+# Resources
 
-`./call-some-command --with-some-options`
-
-# Install
-
-`./install`
-
+* <https://blogtrottr.com/>
+* <https://getrssfeed.com/>
+* <https://zapier.com/>
