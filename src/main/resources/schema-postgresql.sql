@@ -22,37 +22,37 @@ CREATE TABLE "feed_item" (
 	"pub_date" TEXT NOT NULL
 );;
 
-CREATE TABLE "feed_item_sync_event" (
+CREATE TABLE "sync_event" (
 	"id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	"action" TEXT NOT NULL check (action in ('I','D','U')),
 	"feed_item_id" BIGINT NOT NULL
 );;
 
-CREATE OR REPLACE FUNCTION feed_item_sync_function()
+CREATE OR REPLACE FUNCTION sync_function()
 	RETURNS TRIGGER
 	LANGUAGE PLPGSQL
 	AS
 $$
 BEGIN
-	PERFORM pg_notify('feed_item_sync_event_channel', NULL);
+	PERFORM pg_notify('sync_event_channel', NULL);
 	if (TG_OP = 'INSERT') then
-		INSERT INTO feed_item_sync_event(feed_item_id, action) VALUES (NEW.id, substring(TG_OP,1,1));
+		INSERT INTO sync_event(feed_item_id, action) VALUES (NEW.id, substring(TG_OP,1,1));
 		RETURN NEW;
 	elsif (TG_OP = 'UPDATE') then
-    	INSERT INTO feed_item_sync_event(feed_item_id, action) VALUES (NEW.id, substring(TG_OP,1,1));
+    	INSERT INTO sync_event(feed_item_id, action) VALUES (NEW.id, substring(TG_OP,1,1));
 		RETURN NEW;
     elsif (TG_OP = 'DELETE') then
-		INSERT INTO feed_item_sync_event(feed_item_id, action) VALUES (OLD.id, substring(TG_OP,1,1));
+		INSERT INTO sync_event(feed_item_id, action) VALUES (OLD.id, substring(TG_OP,1,1));
 		RETURN OLD;
 	else
-		RAISE WARNING '[feed_item_sync_function] - unknown action occurred: %, at %', TG_OP, now();
+		RAISE WARNING '[sync_function] - unknown action occurred: %, at %', TG_OP, now();
 		RETURN NULL;
 	end if;
 END;
 $$;;
 
-CREATE TRIGGER feed_item_sync_trigger
+CREATE TRIGGER sync_trigger
 	AFTER INSERT OR UPDATE OR DELETE
 	ON feed_item
 	FOR EACH ROW
-	EXECUTE PROCEDURE feed_item_sync_function();;
+	EXECUTE PROCEDURE sync_function();;
