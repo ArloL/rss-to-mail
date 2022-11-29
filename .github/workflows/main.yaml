@@ -84,7 +84,7 @@ jobs:
           --activate-profiles native \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
-          verify native:compile
+          verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} version \"${REVISION}\""
@@ -141,7 +141,7 @@ jobs:
           --activate-profiles native \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
-          verify native:compile
+          verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} version \"${REVISION}\""
@@ -192,7 +192,7 @@ jobs:
       run: choco install upx --version=3.96 --no-progress
     - name: Build with Maven
       run: |
-        .\mvnw --batch-mode --activate-profiles native -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify native:compile
+        .\mvnw --batch-mode --activate-profiles native -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
     - name: Test and compress executable
       run: |
         $expectedOutput = "${{ env.ARTIFACT }} version `"$env:REVISION`"`r`n"
