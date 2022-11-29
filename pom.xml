@@ -31,6 +31,7 @@
 	<properties>
 		<sha1>HEAD</sha1>
 		<revision>0.0.1-SNAPSHOT</revision>
+		<platform>unknown</platform>
 		<mainClass>io.github.arlol.RssToMailApplication</mainClass>
 		<testcontainers.version>1.17.6</testcontainers.version>
 	</properties>
@@ -110,6 +111,40 @@
 	</dependencyManagement>
 
 	<profiles>
+		<profile>
+			<id>macos</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<platform>macos</platform>
+			</properties>
+		</profile>
+		<profile>
+			<id>unix</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>Linux</name>
+				</os>
+			</activation>
+			<properties>
+				<platform>linux</platform>
+			</properties>
+		</profile>
+		<profile>
+			<id>windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<platform>windows</platform>
+			</properties>
+		</profile>
 		<profile>
 			<id>native</id>
 			<build>
