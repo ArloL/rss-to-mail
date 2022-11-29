@@ -19,10 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @Slf4j
-public class DemoApplication implements ApplicationRunner {
+public class RssToMailApplication implements ApplicationRunner {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(RssToMailApplication.class, args);
 	}
 
 	@Autowired
