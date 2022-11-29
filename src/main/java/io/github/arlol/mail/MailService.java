@@ -20,8 +20,8 @@ public class MailService {
 
 	public void send(MailMessage mailMessage) {
 		SimpleMailMessage message = mailMessage.toBuilder()
-				.to(mailProperties.getTo())
-				.from(mailProperties.getFrom())
+				.to(mailProperties.to())
+				.from(mailProperties.from())
 				.build()
 				.toSimpleMailMessage();
 		emailSender.send(message);

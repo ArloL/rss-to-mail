@@ -7,6 +7,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import com.apptasticsoftware.rssreader.Item;
 
@@ -15,9 +16,11 @@ import io.github.arlol.feed.ChannelRepository;
 import io.github.arlol.feed.FeedItem;
 import io.github.arlol.feed.FeedItemRepository;
 import io.github.arlol.feed.SilentRssReader;
+import io.github.arlol.mail.MailProperties;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
+@EnableConfigurationProperties(MailProperties.class)
 @Slf4j
 public class RssToMailApplication implements ApplicationRunner {
 
