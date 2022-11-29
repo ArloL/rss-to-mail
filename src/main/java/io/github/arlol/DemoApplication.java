@@ -32,9 +32,6 @@ public class DemoApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		// wird auch immer auf dem blog gepostet
-		// String derdaskfmwak =
-		// "https://feeds.soundcloud.com/users/soundcloud:users:62364534/sounds.rss";
 		String eigentlichHeißenWirKlaus = "https://feeds.soundcloud.com/users/soundcloud:users:546708438/sounds.rss";
 		String montagssorbet = "https://feeds.soundcloud.com/playlists/soundcloud:playlists:2111915/sounds.rss";
 		List.of(
