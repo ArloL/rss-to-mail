@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS "channel";;
 
 DROP TABLE IF EXISTS "feed_item";;
 
+DROP TABLE IF EXISTS "sync_event";;
+
 CREATE TABLE "channel" (
 	"id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	"link" TEXT NOT NULL
@@ -15,10 +17,10 @@ CREATE TABLE "feed_item" (
 	"title" TEXT NOT NULL,
 	"author" TEXT,
 	"category" TEXT,
-	"description" TEXT NOT NULL,
+	"description" TEXT,
 	"guid" TEXT NOT NULL UNIQUE,
 	"is_perma_link" TEXT NOT NULL,
-	"link" TEXT NOT NULL,
+	"link" TEXT,
 	"pub_date" TEXT NOT NULL
 );;
 
