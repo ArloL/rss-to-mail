@@ -8,12 +8,11 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.apptasticsoftware.rssreader.RssReader;
-
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
 import io.github.arlol.feed.FeedItem;
 import io.github.arlol.feed.FeedItemRepository;
+import io.github.arlol.feed.SilentRssReader;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
@@ -45,7 +44,7 @@ public class DemoApplication implements ApplicationRunner {
 				.map(channelRepository::save)
 				.findFirst()
 				.orElseThrow();
-		var articles = new RssReader().read(url)
+		var articles = new SilentRssReader().read(url)
 				.map(
 						item -> FeedItem.builder()
 								.channelId(channel.getId())
