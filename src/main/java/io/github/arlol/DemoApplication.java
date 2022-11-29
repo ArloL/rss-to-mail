@@ -1,13 +1,14 @@
 package io.github.arlol;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.apptasticsoftware.rssreader.Item;
 
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
@@ -47,46 +48,28 @@ public class DemoApplication implements ApplicationRunner {
 	}
 
 	private void process(String url) {
-		Channel channel = Stream.of(Channel.builder().link(url).build())
-				.map(
-						c1 -> channelRepository.findByLink(c1.getLink())
-								.map(
-										c2 -> c1.toBuilder()
-												.id(c2.getId())
-												.build()
-								)
-								.orElse(c1)
-				)
-				.map(channelRepository::save)
-				.findFirst()
-				.orElseThrow();
+		Channel channel = channelRepository
+				.mergeByLink(Channel.builder().link(url).build());
 		var articles = new SilentRssReader().read(url)
-				.map(
-						item -> FeedItem.builder()
-								.channelId(channel.getId())
-								.title(item.getTitle().orElse(null))
-								.description(item.getDescription().orElse(null))
-								.link(item.getLink().orElse(null))
-								.author(item.getAuthor().orElse(null))
-								.category(item.getCategory().orElse(null))
-								.guid(item.getGuid().orElse(null))
-								.isPermaLink(item.getIsPermaLink().orElse(null))
-								.pubDate(item.getPubDate().orElse(null))
-								.build()
-				)
-				.map(
-						i1 -> feedItemRepository.findByGuid(i1.getGuid())
-								.map(
-										i2 -> i1.toBuilder()
-												.id(i2.getId())
-												.build()
-								)
-								.orElse(i1)
-				)
-				.map(feedItemRepository::save)
+				.map(item -> toFeedItem(item, channel))
+				.map(feedItemRepository::mergeByGuid)
 				.map(item -> item.getTitle())
 				.toList();
 		log.info("{}", articles);
+	}
+
+	private static FeedItem toFeedItem(Item item, Channel channel) {
+		return FeedItem.builder()
+				.channelId(channel.getId())
+				.title(item.getTitle().orElse(null))
+				.description(item.getDescription().orElse(null))
+				.link(item.getLink().orElse(null))
+				.author(item.getAuthor().orElse(null))
+				.category(item.getCategory().orElse(null))
+				.guid(item.getGuid().orElse(null))
+				.isPermaLink(item.getIsPermaLink().orElse(null))
+				.pubDate(item.getPubDate().orElse(null))
+				.build();
 	}
 
 }
