@@ -1,5 +1,6 @@
 package io.github.arlol;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,22 @@ public class DemoApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		String url = "https://ra.co/xml/podcast.xml";
+		// wird auch immer auf dem blog gepostet
+		// String derdaskfmwak =
+		// "https://feeds.soundcloud.com/users/soundcloud:users:62364534/sounds.rss";
+		String eigentlichHeißenWirKlaus = "https://feeds.soundcloud.com/users/soundcloud:users:546708438/sounds.rss";
+		String montagssorbet = "https://feeds.soundcloud.com/playlists/soundcloud:playlists:2111915/sounds.rss";
+		List.of(
+				"https://groove.de/category/podcast/feed/",
+				"https://ra.co/xml/podcast.xml",
+				montagssorbet,
+				eigentlichHeißenWirKlaus,
+				"https://www.kraftfuttermischwerk.de/blogg/tag/dj-mix/feed/",
+				"https://fiehe.info/1live-fiehe-podcast.rss"
+		).forEach(this::process);
+	}
+
+	private void process(String url) {
 		Channel channel = Stream.of(Channel.builder().link(url).build())
 				.map(
 						c1 -> channelRepository.findByLink(c1.getLink())
