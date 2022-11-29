@@ -6,7 +6,7 @@ on:
   - cron: '28 10 16 * *'
 env:
   ARTIFACT: rss-to-mail
-  GRAALVM_VERSION: 22.2.0
+  GRAALVM_VERSION: 22.3.0
   JAVA_VERSION: 17
 
 jobs:
