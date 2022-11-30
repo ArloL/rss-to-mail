@@ -87,7 +87,7 @@ jobs:
           verify
     - name: Test and compress executable
       run: |
-        expectedOutput="${ARTIFACT} version \"${REVISION}\""
+        expectedOutput="${ARTIFACT} ${REVISION}"
         firstOutput=$("./target/${ARTIFACT}-macos-${REVISION}" --version)
         upx "target/${ARTIFACT}-macos-${REVISION}"
         secondOutput=$("./target/${ARTIFACT}-macos-${REVISION}" --version)
@@ -144,7 +144,7 @@ jobs:
           verify
     - name: Test and compress executable
       run: |
-        expectedOutput="${ARTIFACT} version \"${REVISION}\""
+        expectedOutput="${ARTIFACT} ${REVISION}"
         firstOutput=$("./target/${ARTIFACT}-linux-${REVISION}" --version)
         ./upx-3.96-amd64_linux/upx "target/${ARTIFACT}-linux-${REVISION}"
         secondOutput=$("./target/${ARTIFACT}-linux-${REVISION}" --version)
@@ -195,7 +195,7 @@ jobs:
         .\mvnw --batch-mode --activate-profiles native -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
     - name: Test and compress executable
       run: |
-        $expectedOutput = "${{ env.ARTIFACT }} version `"$env:REVISION`"`r`n"
+        $expectedOutput = "${{ env.ARTIFACT }} ${{ env.REVISION }}`r`n"
         $firstOutput = & "./target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe" --% "--version" | Out-String
         upx "target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe"
         $secondOutput = & "./target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe" --% "--version" | Out-String
