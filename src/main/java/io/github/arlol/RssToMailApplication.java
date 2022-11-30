@@ -25,6 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 public class RssToMailApplication implements ApplicationRunner {
 
 	public static void main(String[] args) {
+		if (args.length == 1 && "--version".equals(args[0])) {
+			String title = RssToMailApplication.class.getPackage()
+					.getImplementationTitle();
+			String version = RssToMailApplication.class.getPackage()
+					.getImplementationVersion();
+			System.out.println(title + " " + version);
+			return;
+		}
 		SpringApplication.run(RssToMailApplication.class, args);
 	}
 
