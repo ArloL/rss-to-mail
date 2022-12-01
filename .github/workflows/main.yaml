@@ -65,7 +65,7 @@ jobs:
     needs: version
     env:
       REVISION: ${{ needs.version.outputs.new_version }}
-      PLATFORM: macos
+      X_PLATFORM: macos
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: graalvm/setup-graalvm@v1.0.9
@@ -80,14 +80,14 @@ jobs:
         set -o xtrace
         ./mvnw \
           --batch-mode \
-          --activate-profiles "native,${PLATFORM}" \
+          --activate-profiles "native,${X_PLATFORM}" \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
           verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} ${REVISION}"
-        firstOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
+        firstOutput=$("./target/${ARTIFACT}-${X_PLATFORM}-${REVISION}" --version)
         if [ "$firstOutput" != "$expectedOutput" ]; then
           echo "The first output is wrong. Expected:"
           echo "$expectedOutput"
@@ -110,7 +110,7 @@ jobs:
     needs: version
     env:
       REVISION: ${{ needs.version.outputs.new_version }}
-      PLATFORM: linux
+      X_PLATFORM: linux
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: graalvm/setup-graalvm@v1.0.9
@@ -125,14 +125,14 @@ jobs:
         set -o xtrace
         ./mvnw \
           --batch-mode \
-          --activate-profiles "native,${PLATFORM}" \
+          --activate-profiles "native,${X_PLATFORM}" \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
           verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} ${REVISION}"
-        firstOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
+        firstOutput=$("./target/${ARTIFACT}-${X_PLATFORM}-${REVISION}" --version)
         if [ "$firstOutput" != "$expectedOutput" ]; then
           echo "The first output is wrong. Expected:"
           echo "$expectedOutput"
@@ -155,7 +155,7 @@ jobs:
     needs: version
     env:
       REVISION: ${{ needs.version.outputs.new_version }}
-      PLATFORM: windows
+      X_PLATFORM: windows
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: graalvm/setup-graalvm@v1.0.9
@@ -167,11 +167,11 @@ jobs:
         cache: 'maven'
     - name: Build with Maven
       run: |
-        .\mvnw --batch-mode --activate-profiles "native,$env:PLATFORM" -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
+        .\mvnw --batch-mode --activate-profiles "native,$env:X_PLATFORM" -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
     - name: Test and compress executable
       run: |
         $expectedOutput = "$env:ARTIFACT $env:REVISION`r`n"
-        $firstOutput = & "./target/$env:ARTIFACT-$env:PLATFORM-$env:REVISION.exe" --% "--version" | Out-String
+        $firstOutput = & "./target/$env:ARTIFACT-$env:X_PLATFORM-$env:REVISION.exe" --% "--version" | Out-String
         if ($firstOutput -ne $expectedOutput) {
           echo "The first output is wrong. Expected:"
           echo $expectedOutput
