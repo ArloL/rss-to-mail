@@ -32,7 +32,7 @@
 		<sha1>HEAD</sha1>
 		<revision>0.0.1-SNAPSHOT</revision>
 		<platform>unknown</platform>
-		<mainClass>io.github.arlol.RssToMailApplication</mainClass>
+		<start-class>io.github.arlol.RssToMailApplication</start-class>
 		<testcontainers.version>1.17.6</testcontainers.version>
 	</properties>
 
@@ -261,17 +261,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${mainClass}</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
