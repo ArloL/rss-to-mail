@@ -98,7 +98,7 @@ jobs:
     - name: Move artifacts
       run: |
         mkdir target/artifacts
-        cp "target/${ARTIFACT}-*" target/artifacts
+        cp target/"${ARTIFACT}"-* target/artifacts
     - uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ env.ARTIFACT }}-${{ github.job }}-${{ needs.version.outputs.new_version }}
@@ -143,7 +143,7 @@ jobs:
     - name: Move artifacts
       run: |
         mkdir target/artifacts
-        cp "target/${ARTIFACT}-*" target/artifacts
+        cp target/"${ARTIFACT}"-* target/artifacts
     - uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ env.ARTIFACT }}-${{ github.job }}-${{ needs.version.outputs.new_version }}
