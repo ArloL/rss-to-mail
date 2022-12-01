@@ -82,16 +82,16 @@ jobs:
         set -o xtrace
         ./mvnw \
           --batch-mode \
-          --activate-profiles native,${{ env.PLATFORM }} \
+          --activate-profiles "native,${PLATFORM}" \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
           verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} ${REVISION}"
-        firstOutput=$("./target/${ARTIFACT}-macos-${REVISION}" --version)
-        upx "target/${ARTIFACT}-macos-${REVISION}"
-        secondOutput=$("./target/${ARTIFACT}-macos-${REVISION}" --version)
+        firstOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
+        upx "target/${ARTIFACT}-${PLATFORM}-${REVISION}"
+        secondOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
         if [ "$firstOutput" != "$expectedOutput" ]; then
           echo "The first output is wrong. Expected:"
           echo "$expectedOutput"
@@ -109,7 +109,7 @@ jobs:
     - name: Move artifacts
       run: |
         mkdir target/artifacts
-        cp target/${{ env.ARTIFACT }}-* target/artifacts
+        cp "target/${ARTIFACT}-*" target/artifacts
     - uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ env.ARTIFACT }}-${{ github.job }}-${{ needs.version.outputs.new_version }}
@@ -140,16 +140,16 @@ jobs:
         set -o xtrace
         ./mvnw \
           --batch-mode \
-          --activate-profiles native,${{ env.PLATFORM }} \
+          --activate-profiles "native,${PLATFORM}" \
           -Dsha1="${GITHUB_SHA}" \
           -Drevision="${REVISION}" \
           verify
     - name: Test and compress executable
       run: |
         expectedOutput="${ARTIFACT} ${REVISION}"
-        firstOutput=$("./target/${ARTIFACT}-linux-${REVISION}" --version)
-        ./upx-3.96-amd64_linux/upx "target/${ARTIFACT}-linux-${REVISION}"
-        secondOutput=$("./target/${ARTIFACT}-linux-${REVISION}" --version)
+        firstOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
+        ./upx-3.96-amd64_linux/upx "target/${ARTIFACT}-${PLATFORM}-${REVISION}"
+        secondOutput=$("./target/${ARTIFACT}-${PLATFORM}-${REVISION}" --version)
         if [ "$firstOutput" != "$expectedOutput" ]; then
           echo "The first output is wrong. Expected:"
           echo "$expectedOutput"
@@ -167,7 +167,7 @@ jobs:
     - name: Move artifacts
       run: |
         mkdir target/artifacts
-        cp target/${{ env.ARTIFACT }}-* target/artifacts
+        cp "target/${ARTIFACT}-*" target/artifacts
     - uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ env.ARTIFACT }}-${{ github.job }}-${{ needs.version.outputs.new_version }}
@@ -195,13 +195,13 @@ jobs:
       run: choco install upx --version=3.96 --no-progress
     - name: Build with Maven
       run: |
-        .\mvnw --batch-mode --activate-profiles native,${{ env.PLATFORM }} -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
+        .\mvnw --batch-mode --activate-profiles "native,$env:PLATFORM" -Dsha1="$env:GITHUB_SHA" -Drevision="$env:REVISION" verify
     - name: Test and compress executable
       run: |
-        $expectedOutput = "${{ env.ARTIFACT }} ${{ env.REVISION }}`r`n"
-        $firstOutput = & "./target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe" --% "--version" | Out-String
-        upx "target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe"
-        $secondOutput = & "./target/${{ env.ARTIFACT }}-windows-$env:REVISION.exe" --% "--version" | Out-String
+        $expectedOutput = "$env:ARTIFACT $env:REVISION`r`n"
+        $firstOutput = & "./target/$env:ARTIFACT-$env:PLATFORM-$env:REVISION.exe" --% "--version" | Out-String
+        upx "target/$env:ARTIFACT-windows-$env:REVISION.exe"
+        $secondOutput = & "./target/$env:ARTIFACT-$env:PLATFORM-$env:REVISION.exe" --% "--version" | Out-String
         if ($firstOutput -ne $expectedOutput) {
           echo "The first output is wrong. Expected:"
           echo $expectedOutput
@@ -219,7 +219,7 @@ jobs:
     - name: Move artifacts
       run: |
         mkdir target/artifacts
-        copy target/${{ env.ARTIFACT }}-* target/artifacts
+        copy target/$env:ARTIFACT-* target/artifacts
     - uses: actions/upload-artifact@v3.1.1
       with:
         name: ${{ env.ARTIFACT }}-${{ github.job }}-${{ needs.version.outputs.new_version }}
@@ -239,9 +239,9 @@ jobs:
     - name: Build project
       working-directory: target
       run: |
-        zip -r windows.zip ${{ env.ARTIFACT }}-windows-${{ needs.version.outputs.new_version }}/
-        zip -r linux.zip ${{ env.ARTIFACT }}-linux-${{ needs.version.outputs.new_version }}/
-        zip -r macos.zip ${{ env.ARTIFACT }}-macos-${{ needs.version.outputs.new_version }}/
+        zip -r windows.zip ${ARTIFACT}-windows-${{ needs.version.outputs.new_version }}/
+        zip -r linux.zip ${ARTIFACT}-linux-${{ needs.version.outputs.new_version }}/
+        zip -r macos.zip ${ARTIFACT}-macos-${{ needs.version.outputs.new_version }}/
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.1.4
