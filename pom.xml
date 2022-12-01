@@ -162,7 +162,17 @@
 						</executions>
 						<configuration>
 							<imageName>${project.artifactId}-${platform}-${project.version}</imageName>
+							<classesDirectory combine.self="override" />
 						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>repackage</id>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
