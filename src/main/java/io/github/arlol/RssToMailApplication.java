@@ -26,7 +26,10 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	public static void main(String[] args) {
 		if (args.length == 1 && "--version".equals(args[0])) {
-			System.out.println(ManifestVersion.get("rss-to-mail"));
+			Package pkg = RssToMailApplication.class.getPackage();
+			String title = pkg.getImplementationTitle();
+			String version = pkg.getImplementationVersion();
+			System.out.println(title + " " + version);
 			return;
 		}
 		SpringApplication.run(RssToMailApplication.class, args);
