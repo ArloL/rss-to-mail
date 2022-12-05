@@ -14,6 +14,7 @@ import com.apptasticsoftware.rssreader.Item;
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
 import io.github.arlol.feed.FeedItem;
+import io.github.arlol.feed.FeedItemProcessor;
 import io.github.arlol.feed.FeedItemRepository;
 import io.github.arlol.feed.SilentRssReader;
 import io.github.arlol.mail.MailProperties;
@@ -39,6 +40,8 @@ public class RssToMailApplication implements ApplicationRunner {
 	FeedItemRepository feedItemRepository;
 	@Autowired
 	ChannelRepository channelRepository;
+	@Autowired
+	FeedItemProcessor feedItemProcessor;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -52,6 +55,8 @@ public class RssToMailApplication implements ApplicationRunner {
 				"https://www.kraftfuttermischwerk.de/blogg/tag/dj-mix/feed/",
 				"https://fiehe.info/1live-fiehe-podcast.rss"
 		).forEach(this::process);
+		while (feedItemProcessor.processMails()) {
+		}
 	}
 
 	private void process(String url) {
