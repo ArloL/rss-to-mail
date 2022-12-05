@@ -13,7 +13,12 @@ public interface FeedItemRepository extends CrudRepository<FeedItem, Long> {
 	default FeedItem mergeByGuid(FeedItem feedItem) {
 		return save(
 				findByGuid(feedItem.getGuid())
-						.map(fi -> feedItem.toBuilder().id(fi.getId()).build())
+						.map(
+								fi -> feedItem.toBuilder()
+										.id(fi.getId())
+										.processed(fi.isProcessed())
+										.build()
+						)
 						.orElse(feedItem)
 		);
 	}
