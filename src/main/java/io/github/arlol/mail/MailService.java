@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailService {
 
-	private final JavaMailSender emailSender;
+	private final JavaMailSender mailSender;
 	private final MailProperties mailProperties;
 
 	public MailService(
 			JavaMailSender emailSender,
 			MailProperties mailProperties
 	) {
-		this.emailSender = emailSender;
+		this.mailSender = emailSender;
 		this.mailProperties = mailProperties;
 	}
 
@@ -24,7 +24,7 @@ public class MailService {
 				.from(mailProperties.from())
 				.build()
 				.toSimpleMailMessage();
-		emailSender.send(message);
+		mailSender.send(message);
 	}
 
 }
