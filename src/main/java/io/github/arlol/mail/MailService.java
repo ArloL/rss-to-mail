@@ -19,6 +19,9 @@ public class MailService {
 	}
 
 	public void send(MailMessage mailMessage) {
+		if (!mailProperties.enabled()) {
+			return;
+		}
 		SimpleMailMessage message = mailMessage.toBuilder()
 				.to(mailProperties.to())
 				.from(mailProperties.from())

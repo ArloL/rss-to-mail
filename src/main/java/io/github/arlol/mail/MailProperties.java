@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "rss-to-mail.mail")
 public record MailProperties(
 		String from,
-		String[] to
+		String[] to,
+		boolean enabled
 ) {
 
 }
