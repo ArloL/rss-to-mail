@@ -20,5 +20,6 @@ public class FeedItem {
 	private String guid;
 	private Boolean isPermaLink;
 	private String pubDate;
+	private boolean processed;
 
 }
