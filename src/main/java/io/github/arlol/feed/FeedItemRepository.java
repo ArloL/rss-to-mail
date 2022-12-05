@@ -23,4 +23,6 @@ public interface FeedItemRepository extends CrudRepository<FeedItem, Long> {
 		);
 	}
 
+	Optional<FeedItem> findFirstByProcessedIsFalse();
+
 }
