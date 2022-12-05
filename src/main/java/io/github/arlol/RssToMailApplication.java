@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import com.apptasticsoftware.rssreader.Item;
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
@@ -21,6 +22,7 @@ import io.github.arlol.mail.MailProperties;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
+@EnableEncryptableProperties
 @EnableConfigurationProperties(MailProperties.class)
 @Slf4j
 public class RssToMailApplication implements ApplicationRunner {
