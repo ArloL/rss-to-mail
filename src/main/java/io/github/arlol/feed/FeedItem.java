@@ -1,5 +1,7 @@
 package io.github.arlol.feed;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 
 import lombok.Builder;
@@ -17,6 +19,7 @@ public class FeedItem {
 	private String link;
 	private String author;
 	private String category;
+	private List<String> categories;
 	private String guid;
 	private Boolean isPermaLink;
 	private String pubDate;

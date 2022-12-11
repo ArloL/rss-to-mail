@@ -80,6 +80,7 @@ public class RssToMailApplication implements ApplicationRunner {
 				.link(item.getLink().orElse(null))
 				.author(item.getAuthor().orElse(null))
 				.category(item.getCategory().orElse(null))
+				.categories(item.getCategories())
 				.guid(item.getGuid().orElse(null))
 				.isPermaLink(item.getIsPermaLink().orElse(null))
 				.pubDate(item.getPubDate().orElse(null))
