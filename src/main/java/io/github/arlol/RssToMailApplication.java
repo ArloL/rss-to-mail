@@ -62,10 +62,10 @@ public class RssToMailApplication implements ApplicationRunner {
 						.link("https://www.kraftfuttermischwerk.de/")
 						.feeds(
 								List.of(
-										"https://www.kraftfuttermischwerk.de/blogg/tag/dj-mix/feed/",
-										"https://www.kraftfuttermischwerk.de/blogg/tag/live-set/feed/"
+										"https://www.kraftfuttermischwerk.de/blogg/feed/"
 								)
 						)
+						.categories(List.of("DJ-Mix", "Live-Set"))
 						.build()
 		);
 
@@ -91,6 +91,18 @@ public class RssToMailApplication implements ApplicationRunner {
 		for (String string : channel.getFeeds()) {
 			var articles = new SilentRssReader().read(string)
 					.map(item -> toFeedItem(item, channel))
+					.filter(item -> {
+						if (channel.getCategories() == null
+								|| channel.getCategories().isEmpty()) {
+							return true;
+						}
+						for (String category : item.getCategories()) {
+							if (channel.getCategories().contains(category)) {
+								return true;
+							}
+						}
+						return false;
+					})
 					.filter(item -> item.getPublished().isAfter(CUTOFF_DATE))
 					.map(feedItemRepository::mergeByGuid)
 					.map(item -> item.getTitle())
