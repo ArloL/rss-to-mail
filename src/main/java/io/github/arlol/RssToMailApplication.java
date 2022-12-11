@@ -1,5 +1,6 @@
 package io.github.arlol;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,11 @@ public class RssToMailApplication implements ApplicationRunner {
 				.guid(item.getGuid().orElse(null))
 				.isPermaLink(item.getIsPermaLink().orElse(null))
 				.pubDate(item.getPubDate().orElse(null))
+				.published(
+						item.getPubDateZonedDateTime()
+								.map(OffsetDateTime::from)
+								.orElse(null)
+				)
 				.build();
 	}
 

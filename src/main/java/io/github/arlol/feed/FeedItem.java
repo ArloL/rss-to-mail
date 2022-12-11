@@ -1,5 +1,6 @@
 package io.github.arlol.feed;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -24,5 +25,6 @@ public class FeedItem {
 	private Boolean isPermaLink;
 	private String pubDate;
 	private boolean processed;
+	private OffsetDateTime published;
 
 }
