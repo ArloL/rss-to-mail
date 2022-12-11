@@ -15,5 +15,6 @@ public class Channel {
 	private Long id;
 	private String link;
 	private List<String> feeds;
+	private List<String> categories;
 
 }
