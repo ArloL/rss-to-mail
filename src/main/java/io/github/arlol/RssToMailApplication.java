@@ -1,6 +1,7 @@
 package io.github.arlol;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,27 +51,47 @@ public class RssToMailApplication implements ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		String eigentlichHeißenWirKlaus = "https://feeds.soundcloud.com/users/soundcloud:users:546708438/sounds.rss";
 		String montagssorbet = "https://feeds.soundcloud.com/playlists/soundcloud:playlists:2111915/sounds.rss";
+
+		var channels = new ArrayList<Channel>();
+		channels.add(
+				Channel.builder()
+						.link("https://www.kraftfuttermischwerk.de/")
+						.feeds(
+								List.of(
+										"https://www.kraftfuttermischwerk.de/blogg/tag/dj-mix/feed/",
+										"https://www.kraftfuttermischwerk.de/blogg/tag/live-set/feed/"
+								)
+						)
+						.build()
+		);
+
 		List.of(
 				"https://groove.de/category/podcast/feed/",
 				"https://ra.co/xml/podcast.xml",
 				montagssorbet,
 				eigentlichHeißenWirKlaus,
-				"https://www.kraftfuttermischwerk.de/blogg/tag/dj-mix/feed/",
 				"https://fiehe.info/1live-fiehe-podcast.rss"
-		).forEach(this::process);
+		).stream().map(link -> {
+			return Channel.builder().link(link).feeds(List.of(link)).build();
+		}).forEach(channels::add);
+
+		channels.stream()
+				.map(channelRepository::mergeByLink)
+				.forEach(this::process);
+
 		while (feedItemProcessor.processMails()) {
 		}
 	}
 
-	private void process(String url) {
-		Channel channel = channelRepository
-				.mergeByLink(Channel.builder().link(url).build());
-		var articles = new SilentRssReader().read(url)
-				.map(item -> toFeedItem(item, channel))
-				.map(feedItemRepository::mergeByGuid)
-				.map(item -> item.getTitle())
-				.toList();
-		log.info("{}", articles);
+	private void process(Channel channel) {
+		for (String string : channel.getFeeds()) {
+			var articles = new SilentRssReader().read(string)
+					.map(item -> toFeedItem(item, channel))
+					.map(feedItemRepository::mergeByGuid)
+					.map(item -> item.getTitle())
+					.toList();
+			log.info("{}", articles);
+		}
 	}
 
 	private static FeedItem toFeedItem(Item item, Channel channel) {
