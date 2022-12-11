@@ -1,6 +1,7 @@
 package io.github.arlol;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,9 @@ public class RssToMailApplication implements ApplicationRunner {
 	@Autowired
 	FeedItemProcessor feedItemProcessor;
 
+	private static final OffsetDateTime CUTOFF_DATE = OffsetDateTime
+			.of(2022, 12, 1, 8, 0, 0, 0, ZoneOffset.ofHours(+1));
+
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		String eigentlichHeißenWirKlaus = "https://feeds.soundcloud.com/users/soundcloud:users:546708438/sounds.rss";
@@ -87,6 +91,7 @@ public class RssToMailApplication implements ApplicationRunner {
 		for (String string : channel.getFeeds()) {
 			var articles = new SilentRssReader().read(string)
 					.map(item -> toFeedItem(item, channel))
+					.filter(item -> item.getPublished().isAfter(CUTOFF_DATE))
 					.map(feedItemRepository::mergeByGuid)
 					.map(item -> item.getTitle())
 					.toList();
