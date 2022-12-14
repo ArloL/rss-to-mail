@@ -30,10 +30,17 @@ public class FeedItemProcessor {
 			FeedItem item = optItem.get();
 			item = item.toBuilder().processed(true).build();
 			item = feedItemRepository.save(item);
+			String text = "";
+			if (item.getLink() != null) {
+				text = item.getLink();
+			}
+			if (item.getIsPermaLink()) {
+				text = item.getGuid();
+			}
 			mailService.send(
 					MailMessage.builder()
 							.subject(item.getTitle())
-							.text(item.getLink())
+							.text(text)
 							.build()
 			);
 			return true;
