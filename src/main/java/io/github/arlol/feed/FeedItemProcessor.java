@@ -13,12 +13,15 @@ public class FeedItemProcessor {
 
 	private final FeedItemRepository feedItemRepository;
 	private final MailService mailService;
+	private final ChannelRepository channelRepository;
 
 	public FeedItemProcessor(
 			FeedItemRepository feedItemRepository,
+			ChannelRepository channelRepository,
 			MailService mailService
 	) {
 		this.feedItemRepository = feedItemRepository;
+		this.channelRepository = channelRepository;
 		this.mailService = mailService;
 	}
 
@@ -30,6 +33,12 @@ public class FeedItemProcessor {
 			FeedItem item = optItem.get();
 			item = item.toBuilder().processed(true).build();
 			item = feedItemRepository.save(item);
+			Channel channel = channelRepository.findById(item.getChannelId())
+					.orElseThrow();
+			String subject = item.getTitle();
+			if (channel.getName() != null && !channel.getName().isBlank()) {
+				subject += " - " + channel.getName();
+			}
 			String text = "";
 			if (item.getLink() != null) {
 				text = item.getLink();
@@ -38,10 +47,7 @@ public class FeedItemProcessor {
 				text = item.getGuid();
 			}
 			mailService.send(
-					MailMessage.builder()
-							.subject(item.getTitle())
-							.text(text)
-							.build()
+					MailMessage.builder().subject(subject).text(text).build()
 			);
 			return true;
 		}
