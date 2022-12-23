@@ -15,10 +15,10 @@
 	<version>${revision}</version>
 
 	<scm>
-		<connection>scm:git:https://github.com/ArloL/rss-to-mail.git</connection>
-		<developerConnection>scm:git:https://github.com/ArloL/rss-to-mail.git</developerConnection>
+		<connection>scm:git:https://github.com/ArloL/rss-to-mail</connection>
+		<developerConnection>scm:git:https://github.com/ArloL/rss-to-mail</developerConnection>
 		<tag>${sha1}</tag>
-		<url>https://github.com/ArloL/rss-to-mail/</url>
+		<url>https://github.com/ArloL/rss-to-mail</url>
 	</scm>
 
 	<licenses>
