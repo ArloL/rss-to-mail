@@ -61,7 +61,7 @@ public class RssToMailApplication implements ApplicationRunner {
 								"https://www.kraftfuttermischwerk.de/blogg/feed/"
 						)
 				)
-				.categories(List.of("DJ-Mix", "Live-Set"))
+				.categories(List.of("DJ-Mix", "Live-Set", "Album Stream"))
 				.build();
 
 		Channel einslivefiehe = Channel.builder()
