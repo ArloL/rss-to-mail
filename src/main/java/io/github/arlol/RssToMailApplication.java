@@ -20,14 +20,11 @@ import io.github.arlol.feed.FeedItem;
 import io.github.arlol.feed.FeedItemProcessor;
 import io.github.arlol.feed.FeedItemRepository;
 import io.github.arlol.feed.SilentRssReader;
-import io.github.arlol.mail.MailProperties;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableEncryptableProperties
-@EnableConfigurationProperties(
-	{ MailProperties.class, RssToMailProperties.class }
-)
+@EnableConfigurationProperties(RssToMailProperties.class)
 @Slf4j
 public class RssToMailApplication implements ApplicationRunner {
 
@@ -56,17 +53,22 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		rssToMailProperties.getChannels().stream().map(channel -> {
-			if (channel.getFeeds() == null) {
-				return channel.toBuilder()
-						.feeds(List.of(channel.getLink()))
-						.build();
-			}
-			return channel;
-		}).map(channelRepository::mergeByLink).forEach(this::process);
+		rssToMailProperties.getConfigs().forEach(config -> {
+			config.getChannels().stream().map(channel -> {
+				if (channel.getFeeds() == null) {
+					return channel.toBuilder()
+							.feeds(List.of(channel.getLink()))
+							.build();
+				}
+				return channel;
+			}).map(channelRepository::mergeByLink).forEach(this::process);
 
-		while (feedItemProcessor.processMails()) {
-		}
+			if (rssToMailProperties.isMailSendingEnabled()) {
+				while (feedItemProcessor
+						.processMails(config.getFrom(), config.getTo())) {
+				}
+			}
+		});
 	}
 
 	private void process(Channel channel) {

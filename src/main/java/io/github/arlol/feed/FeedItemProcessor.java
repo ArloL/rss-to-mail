@@ -2,31 +2,30 @@ package io.github.arlol.feed;
 
 import java.util.Optional;
 
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import io.github.arlol.mail.MailMessage;
-import io.github.arlol.mail.MailService;
 
 @Service
 public class FeedItemProcessor {
 
 	private final FeedItemRepository feedItemRepository;
-	private final MailService mailService;
 	private final ChannelRepository channelRepository;
+	private final JavaMailSender mailSender;
 
 	public FeedItemProcessor(
 			FeedItemRepository feedItemRepository,
 			ChannelRepository channelRepository,
-			MailService mailService
+			JavaMailSender mailSender
 	) {
 		this.feedItemRepository = feedItemRepository;
 		this.channelRepository = channelRepository;
-		this.mailService = mailService;
+		this.mailSender = mailSender;
 	}
 
 	@Transactional
-	public boolean processMails() {
+	public boolean processMails(String from, String[] to) {
 		Optional<FeedItem> optItem = feedItemRepository
 				.findFirstByProcessedIsFalse();
 		if (optItem.isPresent()) {
@@ -46,9 +45,14 @@ public class FeedItemProcessor {
 			if (item.getIsPermaLink()) {
 				text = item.getGuid();
 			}
-			mailService.send(
-					MailMessage.builder().subject(subject).text(text).build()
-			);
+
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setFrom(from);
+			message.setTo(to);
+			message.setSubject(subject);
+			message.setText(text);
+			mailSender.send(message);
+
 			return true;
 		}
 		return false;
