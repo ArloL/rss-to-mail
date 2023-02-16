@@ -104,7 +104,7 @@ public class RssToMailApplication implements ApplicationRunner {
 				.author(item.getAuthor().orElse(null))
 				.categories(item.getCategories())
 				.guid(item.getGuid().orElse(null))
-				.isPermaLink(item.getIsPermaLink().orElse(null))
+				.isPermaLink(item.getIsPermaLink().orElse(Boolean.FALSE))
 				.pubDate(item.getPubDate().orElse(null))
 				.published(
 						item.getPubDateZonedDateTime()
