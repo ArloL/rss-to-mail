@@ -2,7 +2,6 @@ package io.github.arlol;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableEncryptableProperties
-@EnableConfigurationProperties(MailProperties.class)
+@EnableConfigurationProperties(
+	{ MailProperties.class, RssToMailProperties.class }
+)
 @Slf4j
 public class RssToMailApplication implements ApplicationRunner {
 
@@ -42,6 +43,8 @@ public class RssToMailApplication implements ApplicationRunner {
 	}
 
 	@Autowired
+	RssToMailProperties rssToMailProperties;
+	@Autowired
 	FeedItemRepository feedItemRepository;
 	@Autowired
 	ChannelRepository channelRepository;
@@ -53,41 +56,14 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		Channel kraftfuttermischwerk = Channel.builder()
-				.name("Kraftfuttermischwerk")
-				.link("https://www.kraftfuttermischwerk.de/")
-				.feeds(
-						List.of(
-								"https://www.kraftfuttermischwerk.de/blogg/feed/"
-						)
-				)
-				.categories(List.of("DJ-Mix", "Live-Set", "Album Stream"))
-				.build();
-
-		Channel einslivefiehe = Channel.builder()
-				.name("1LIVE Fiehe")
-				.link("https://fiehe.info/1live-fiehe-podcast.rss")
-				.feeds(List.of("https://fiehe.info/1live-fiehe-podcast.rss"))
-				.build();
-
-		var channels = new ArrayList<Channel>();
-		channels.add(kraftfuttermischwerk);
-		channels.add(einslivefiehe);
-
-		String eigentlichHeißenWirKlaus = "https://feeds.soundcloud.com/users/soundcloud:users:546708438/sounds.rss";
-		String montagssorbet = "https://feeds.soundcloud.com/playlists/soundcloud:playlists:2111915/sounds.rss";
-		List.of(
-				"https://groove.de/category/podcast/feed/",
-				"https://ra.co/xml/podcast.xml",
-				montagssorbet,
-				eigentlichHeißenWirKlaus
-		).stream().map(link -> {
-			return Channel.builder().link(link).feeds(List.of(link)).build();
-		}).forEach(channels::add);
-
-		channels.stream()
-				.map(channelRepository::mergeByLink)
-				.forEach(this::process);
+		rssToMailProperties.getChannels().stream().map(channel -> {
+			if (channel.getFeeds() == null) {
+				return channel.toBuilder()
+						.feeds(List.of(channel.getLink()))
+						.build();
+			}
+			return channel;
+		}).map(channelRepository::mergeByLink).forEach(this::process);
 
 		while (feedItemProcessor.processMails()) {
 		}
