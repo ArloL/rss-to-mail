@@ -19,7 +19,6 @@ public class FeedItem {
 	private String description;
 	private String link;
 	private String author;
-	private String category;
 	private List<String> categories;
 	private String guid;
 	private Boolean isPermaLink;
