@@ -9,7 +9,7 @@ import io.github.arlol.feed.Channel;
 @ConfigurationProperties(prefix = "rss-to-mail")
 public class RssToMailProperties {
 
-	public class Config {
+	public static class Config {
 
 		private String from;
 		private String[] to = new String[0];
