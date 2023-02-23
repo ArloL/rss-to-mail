@@ -98,7 +98,7 @@ public class RssToMailApplication implements ApplicationRunner {
 	private static FeedItem toFeedItem(Item item, Channel channel) {
 		return FeedItem.builder()
 				.channelId(channel.getId())
-				.title(item.getTitle().orElse(null))
+				.title(item.getTitle().orElse(""))
 				.description(item.getDescription().orElse(null))
 				.link(item.getLink().orElse(null))
 				.author(item.getAuthor().orElse(null))
