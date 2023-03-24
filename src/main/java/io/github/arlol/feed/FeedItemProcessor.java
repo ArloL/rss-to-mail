@@ -29,7 +29,7 @@ public class FeedItemProcessor {
 		Optional<FeedItem> optItem = feedItemRepository
 				.findFirstByProcessedIsFalse();
 		if (optItem.isPresent()) {
-			FeedItem item = optItem.get();
+			FeedItem item = optItem.orElseThrow();
 			item = item.toBuilder().processed(true).build();
 			item = feedItemRepository.save(item);
 			Channel channel = channelRepository.findById(item.getChannelId())
