@@ -54,6 +54,7 @@ public class RssToMailApplication implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		rssToMailProperties.getConfigs().forEach(config -> {
+			log.info("config: {}", config);
 			config.getChannels().stream().map(channel -> {
 				if (channel.getFeeds() == null) {
 					return channel.toBuilder()
@@ -91,7 +92,7 @@ public class RssToMailApplication implements ApplicationRunner {
 					.map(feedItemRepository::mergeByGuid)
 					.map(item -> item.getTitle())
 					.toList();
-			log.info("{}", articles);
+			log.info("got these articles from feed {}: {}", string, articles);
 		}
 	}
 

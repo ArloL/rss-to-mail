@@ -1,5 +1,6 @@
 package io.github.arlol;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,6 +38,12 @@ public class RssToMailProperties {
 
 		public void setChannels(List<Channel> channels) {
 			this.channels = channels;
+		}
+
+		@Override
+		public String toString() {
+			return "Config [from=" + from + ", to=" + Arrays.toString(to)
+					+ ", channels=" + channels + "]";
 		}
 
 	}
