@@ -11,29 +11,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedItemProcessor {
 
 	private final FeedItemRepository feedItemRepository;
-	private final ChannelRepository channelRepository;
 	private final JavaMailSender mailSender;
 
 	public FeedItemProcessor(
 			FeedItemRepository feedItemRepository,
-			ChannelRepository channelRepository,
 			JavaMailSender mailSender
 	) {
 		this.feedItemRepository = feedItemRepository;
-		this.channelRepository = channelRepository;
 		this.mailSender = mailSender;
 	}
 
 	@Transactional
-	public boolean processMails(String from, String[] to) {
+	public boolean processMails(Channel channel, String from, String[] to) {
 		Optional<FeedItem> optItem = feedItemRepository
-				.findFirstByProcessedIsFalse();
+				.findFirstByChannelIdAndProcessedIsFalse(channel.getId());
 		if (optItem.isPresent()) {
 			FeedItem item = optItem.orElseThrow();
 			item = item.toBuilder().processed(true).build();
 			item = feedItemRepository.save(item);
-			Channel channel = channelRepository.findById(item.getChannelId())
-					.orElseThrow();
 			String subject = item.getTitle();
 			if (channel.getName() != null && !channel.getName().isBlank()) {
 				subject += " - " + channel.getName();

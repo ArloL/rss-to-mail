@@ -2,7 +2,6 @@ package io.github.arlol;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -14,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import com.apptasticsoftware.rssreader.Item;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
+import io.github.arlol.RssToMailProperties.Config;
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
 import io.github.arlol.feed.FeedItem;
@@ -55,24 +55,14 @@ public class RssToMailApplication implements ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		rssToMailProperties.getConfigs().forEach(config -> {
 			log.info("config: {}", config);
-			config.getChannels().stream().map(channel -> {
-				if (channel.getFeeds() == null) {
-					return channel.toBuilder()
-							.feeds(List.of(channel.getLink()))
-							.build();
-				}
-				return channel;
-			}).map(channelRepository::mergeByLink).forEach(this::process);
-
-			if (rssToMailProperties.isMailSendingEnabled()) {
-				while (feedItemProcessor
-						.processMails(config.getFrom(), config.getTo())) {
-				}
-			}
+			config.getChannels()
+					.stream()
+					.map(channelRepository::mergeByLink)
+					.forEach(channel -> this.process(config, channel));
 		});
 	}
 
-	private void process(Channel channel) {
+	private void process(Config config, Channel channel) {
 		for (String string : channel.getFeeds()) {
 			var articles = new SilentRssReader().read(string)
 					.map(item -> toFeedItem(item, channel))
@@ -93,6 +83,11 @@ public class RssToMailApplication implements ApplicationRunner {
 					.map(item -> item.getTitle())
 					.toList();
 			log.info("got these articles from feed {}: {}", string, articles);
+		}
+		if (rssToMailProperties.isMailSendingEnabled()) {
+			while (feedItemProcessor
+					.processMails(channel, config.getFrom(), config.getTo())) {
+			}
 		}
 	}
 
