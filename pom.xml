@@ -31,7 +31,6 @@
 	<properties>
 		<sha1>HEAD</sha1>
 		<revision>0.0.1-SNAPSHOT</revision>
-		<platform>unknown</platform>
 		<start-class>io.github.arlol.RssToMailApplication</start-class>
 	</properties>
 
@@ -95,75 +94,6 @@
 		</dependency>
 
 	</dependencies>
-
-	<profiles>
-		<profile>
-			<id>macos</id>
-			<activation>
-				<os>
-					<family>mac</family>
-				</os>
-			</activation>
-			<properties>
-				<platform>macos</platform>
-			</properties>
-		</profile>
-		<profile>
-			<id>unix</id>
-			<activation>
-				<os>
-					<family>unix</family>
-					<name>Linux</name>
-				</os>
-			</activation>
-			<properties>
-				<platform>linux</platform>
-			</properties>
-		</profile>
-		<profile>
-			<id>windows</id>
-			<activation>
-				<os>
-					<family>windows</family>
-				</os>
-			</activation>
-			<properties>
-				<platform>windows</platform>
-			</properties>
-		</profile>
-		<profile>
-			<id>native</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.graalvm.buildtools</groupId>
-						<artifactId>native-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>compile-no-fork</goal>
-								</goals>
-								<phase>package</phase>
-							</execution>
-						</executions>
-						<configuration>
-							<imageName>${project.artifactId}-${platform}-${project.version}</imageName>
-							<classesDirectory combine.self="override" />
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>repackage</id>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 	<build>
 		<plugins>
