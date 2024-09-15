@@ -6,6 +6,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
+import org.apache.hc.client5.http.cache.CacheResponseStatus;
+import org.apache.hc.client5.http.cache.HttpCacheContext;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
@@ -68,9 +70,9 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		rssToMailProperties.getConfigs().forEach(config -> {
+		rssToMailProperties.configs().forEach(config -> {
 			log.info("config: {}", config);
-			config.getChannels()
+			config.channels()
 					.stream()
 					.map(channelRepository::mergeByLink)
 					.forEach(channel -> this.process(config, channel));
@@ -93,7 +95,7 @@ public class RssToMailApplication implements ApplicationRunner {
 
 			FeedBuilder feedBuilder = feed.toBuilder();
 
-			executeHttpRequest(feed, response -> {
+			executeHttpRequest(feed, (response, context) -> {
 
 				silentGetHeader(response, "ETag").map(Header::getValue)
 						.ifPresent(etag -> {
@@ -104,6 +106,44 @@ public class RssToMailApplication implements ApplicationRunner {
 						.ifPresent(lastModified -> {
 							feedBuilder.lastModified(lastModified);
 						});
+
+				silentGetHeader(response, "Cache-Control").map(Header::getValue)
+						.ifPresent(cacheControl -> {
+							log.info("cache-control {}", cacheControl);
+						});
+
+				CacheResponseStatus responseStatus = context
+						.getCacheResponseStatus();
+				switch (responseStatus) {
+				case CACHE_HIT:
+					log.info(
+							"A response was generated from the cache with "
+									+ "no requests sent upstream"
+					);
+					break;
+				case CACHE_MODULE_RESPONSE:
+					log.info(
+							"The response was generated directly by the "
+									+ "caching module"
+					);
+					break;
+				case CACHE_MISS:
+					log.info("The response came from an upstream server");
+					break;
+				case VALIDATED:
+					log.info(
+							"The response was generated from the cache "
+									+ "after validating the entry with the origin server"
+					);
+					break;
+				case FAILURE:
+					log.info(
+							"The response came from an upstream server after a cache failure"
+					);
+					break;
+				default:
+					break;
+				}
 
 				if (response.getCode() == 304) {
 					log.info("skipped since it was not modified: {}", feed);
@@ -138,9 +178,9 @@ public class RssToMailApplication implements ApplicationRunner {
 			feedRepository.save(feedBuilder.build());
 		}
 
-		if (rssToMailProperties.isMailSendingEnabled()) {
+		if (rssToMailProperties.mailSendingEnabled()) {
 			while (feedItemProcessor
-					.processMails(channel, config.getFrom(), config.getTo())) {
+					.processMails(channel, config.from(), config.to())) {
 			}
 		}
 
@@ -160,7 +200,8 @@ public class RssToMailApplication implements ApplicationRunner {
 	@FunctionalInterface
 	private interface ClassicHttpResponseConsumer {
 
-		void accept(ClassicHttpResponse response) throws IOException;
+		void accept(ClassicHttpResponse response, HttpCacheContext context)
+				throws IOException;
 
 	}
 
@@ -169,6 +210,7 @@ public class RssToMailApplication implements ApplicationRunner {
 			final ClassicHttpResponseConsumer consumer
 	) {
 		try {
+			HttpCacheContext context = HttpCacheContext.create();
 			var requestBuilder = ClassicRequestBuilder.get(feed.url());
 			if (feed.etag() != null) {
 				requestBuilder.addHeader("If-None-Match", feed.etag());
@@ -178,8 +220,8 @@ public class RssToMailApplication implements ApplicationRunner {
 						.addHeader("If-Modified-Since", feed.lastModified());
 			}
 			return httpClient
-					.execute(requestBuilder.build(), null, response -> {
-						consumer.accept(response);
+					.execute(requestBuilder.build(), context, response -> {
+						consumer.accept(response, context);
 						return null;
 					});
 		} catch (IOException e) {
