@@ -211,13 +211,13 @@ public class RssToMailApplication implements ApplicationRunner {
 	) {
 		try {
 			HttpCacheContext context = HttpCacheContext.create();
-			var requestBuilder = ClassicRequestBuilder.get(feed.url());
-			if (feed.etag() != null) {
-				requestBuilder.addHeader("If-None-Match", feed.etag());
+			var requestBuilder = ClassicRequestBuilder.get(feed.getUrl());
+			if (feed.getEtag() != null) {
+				requestBuilder.addHeader("If-None-Match", feed.getEtag());
 			}
-			if (feed.lastModified() != null) {
+			if (feed.getLastModified() != null) {
 				requestBuilder
-						.addHeader("If-Modified-Since", feed.lastModified());
+						.addHeader("If-Modified-Since", feed.getLastModified());
 			}
 			return httpClient
 					.execute(requestBuilder.build(), context, response -> {
