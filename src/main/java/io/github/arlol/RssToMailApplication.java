@@ -166,9 +166,12 @@ public class RssToMailApplication implements ApplicationRunner {
 							}
 							return false;
 						})
-						.filter(
-								item -> item.getPublished().isAfter(CUTOFF_DATE)
-						)
+						.filter(item -> {
+							if (item.getPublished() != null) {
+								return item.getPublished().isAfter(CUTOFF_DATE);
+							}
+							return true;
+						})
 						.map(feedItemRepository::mergeByGuid)
 						.map(item -> item.getTitle())
 						.toList();
