@@ -29,7 +29,6 @@ import io.github.arlol.RssToMailProperties.Config;
 import io.github.arlol.feed.Channel;
 import io.github.arlol.feed.ChannelRepository;
 import io.github.arlol.feed.Feed;
-import io.github.arlol.feed.Feed.FeedBuilder;
 import io.github.arlol.feed.FeedItem;
 import io.github.arlol.feed.FeedItemProcessor;
 import io.github.arlol.feed.FeedItemRepository;
@@ -81,20 +80,19 @@ public class RssToMailApplication implements ApplicationRunner {
 	}
 
 	private void process(Config config, Channel channel) {
-		for (String url : channel.getFeeds()) {
+		for (String url : channel.feeds()) {
 
-			Feed feed = feedRepository
-					.findByChannelIdAndUrl(channel.getId(), url)
+			Feed feed = feedRepository.findByChannelIdAndUrl(channel.id(), url)
 					.orElseGet(() -> {
 						return feedRepository.save(
 								Feed.builder()
-										.channelId(channel.getId())
+										.channelId(channel.id())
 										.url(url)
 										.build()
 						);
 					});
 
-			FeedBuilder feedBuilder = feed.toBuilder();
+			Feed.Builder feedBuilder = feed.toBuilder();
 
 			executeHttpRequest(feed, (response, context) -> {
 
@@ -155,26 +153,25 @@ public class RssToMailApplication implements ApplicationRunner {
 						.read(response.getEntity().getContent())
 						.map(item -> toFeedItem(item, channel))
 						.filter(item -> {
-							if (channel.getCategories() == null
-									|| channel.getCategories().isEmpty()) {
+							if (channel.categories() == null
+									|| channel.categories().isEmpty()) {
 								return true;
 							}
-							for (String category : item.getCategories()) {
-								if (channel.getCategories()
-										.contains(category)) {
+							for (String category : item.categories()) {
+								if (channel.categories().contains(category)) {
 									return true;
 								}
 							}
 							return false;
 						})
 						.filter(item -> {
-							if (item.getPublished() != null) {
-								return item.getPublished().isAfter(CUTOFF_DATE);
+							if (item.published() != null) {
+								return item.published().isAfter(CUTOFF_DATE);
 							}
 							return true;
 						})
 						.map(feedItemRepository::mergeByGuid)
-						.map(item -> item.getTitle())
+						.map(item -> item.title())
 						.toList();
 				log.info("got these articles from feed {}: {}", feed, articles);
 			});
@@ -215,13 +212,13 @@ public class RssToMailApplication implements ApplicationRunner {
 	) {
 		try {
 			HttpCacheContext context = HttpCacheContext.create();
-			var requestBuilder = ClassicRequestBuilder.get(feed.getUrl());
-			if (feed.getEtag() != null) {
-				requestBuilder.addHeader("If-None-Match", feed.getEtag());
+			var requestBuilder = ClassicRequestBuilder.get(feed.url());
+			if (feed.etag() != null) {
+				requestBuilder.addHeader("If-None-Match", feed.etag());
 			}
-			if (feed.getLastModified() != null) {
+			if (feed.lastModified() != null) {
 				requestBuilder
-						.addHeader("If-Modified-Since", feed.getLastModified());
+						.addHeader("If-Modified-Since", feed.lastModified());
 			}
 			return httpClient
 					.execute(requestBuilder.build(), context, response -> {
@@ -236,7 +233,7 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	private static FeedItem toFeedItem(Item item, Channel channel) {
 		return FeedItem.builder()
-				.channelId(channel.getId())
+				.channelId(channel.id())
 				.title(item.getTitle().orElse(""))
 				.description(item.getDescription().orElse(null))
 				.link(item.getLink().orElse(null))

@@ -24,21 +24,21 @@ public class FeedItemProcessor {
 	@Transactional
 	public boolean processMails(Channel channel, String from, String[] to) {
 		Optional<FeedItem> optItem = feedItemRepository
-				.findFirstByChannelIdAndProcessedIsFalse(channel.getId());
+				.findFirstByChannelIdAndProcessedIsFalse(channel.id());
 		if (optItem.isPresent()) {
 			FeedItem item = optItem.orElseThrow();
 			item = item.toBuilder().processed(true).build();
 			item = feedItemRepository.save(item);
-			String subject = item.getTitle();
-			if (channel.getName() != null && !channel.getName().isBlank()) {
-				subject += " - " + channel.getName();
+			String subject = item.title();
+			if (channel.name() != null && !channel.name().isBlank()) {
+				subject += " - " + channel.name();
 			}
 			String text = "";
-			if (item.getLink() != null) {
-				text = item.getLink();
+			if (item.link() != null) {
+				text = item.link();
 			}
-			if (item.getIsPermaLink()) {
-				text = item.getGuid();
+			if (item.isPermaLink()) {
+				text = item.guid();
 			}
 
 			SimpleMailMessage message = new SimpleMailMessage();
