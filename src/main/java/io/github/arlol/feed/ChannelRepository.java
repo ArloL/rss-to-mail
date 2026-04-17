@@ -12,8 +12,8 @@ public interface ChannelRepository extends CrudRepository<Channel, Long> {
 	@Transactional
 	default Channel mergeByLink(Channel channel) {
 		return save(
-				findByLink(channel.getLink())
-						.map(c -> channel.toBuilder().id(c.getId()).build())
+				findByLink(channel.link())
+						.map(c -> channel.toBuilder().id(c.id()).build())
 						.orElse(channel)
 		);
 	}

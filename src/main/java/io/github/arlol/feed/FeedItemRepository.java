@@ -12,11 +12,11 @@ public interface FeedItemRepository extends CrudRepository<FeedItem, Long> {
 	@Transactional
 	default FeedItem mergeByGuid(FeedItem feedItem) {
 		return save(
-				findByGuid(feedItem.getGuid())
+				findByGuid(feedItem.guid())
 						.map(
 								fi -> feedItem.toBuilder()
-										.id(fi.getId())
-										.processed(fi.isProcessed())
+										.id(fi.id())
+										.processed(fi.processed())
 										.build()
 						)
 						.orElse(feedItem)
