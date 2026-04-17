@@ -13,6 +13,8 @@ import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -32,11 +34,9 @@ import io.github.arlol.feed.FeedItem;
 import io.github.arlol.feed.FeedItemProcessor;
 import io.github.arlol.feed.FeedItemRepository;
 import io.github.arlol.feed.FeedRepository;
-import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableConfigurationProperties(RssToMailProperties.class)
-@Slf4j
 public class RssToMailApplication implements ApplicationRunner {
 
 	public static void main(String[] args) {
@@ -49,6 +49,9 @@ public class RssToMailApplication implements ApplicationRunner {
 		}
 		SpringApplication.run(RssToMailApplication.class, args);
 	}
+
+	private final Logger log = LoggerFactory
+			.getLogger(RssToMailApplication.class);
 
 	@Autowired
 	RssToMailProperties rssToMailProperties;
