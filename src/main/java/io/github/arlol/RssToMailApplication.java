@@ -90,110 +90,148 @@ public class RssToMailApplication implements ApplicationRunner {
 
 	private void process(Config config, Channel channel) {
 		for (String url : channel.feeds()) {
+			refreshFeed(channel, url);
+		}
+		if (rssToMailProperties.mailSendingEnabled()) {
+			sendMails(config, channel);
+		}
+	}
 
-			Feed feed = feedRepository.findByChannelIdAndUrl(channel.id(), url)
-					.orElseGet(() -> {
-						return feedRepository.save(
+	private void refreshFeed(Channel channel, String url) {
+		Feed feed = findOrCreateFeed(channel, url);
+		Feed.Builder feedBuilder = feed.toBuilder();
+		executeHttpRequest(
+				feed,
+				(response, context) -> handleResponse(
+						channel,
+						feed,
+						feedBuilder,
+						response,
+						context
+				)
+		);
+		feedRepository.save(feedBuilder.build());
+	}
+
+	private Feed findOrCreateFeed(Channel channel, String url) {
+		return feedRepository.findByChannelIdAndUrl(channel.id(), url)
+				.orElseGet(
+						() -> feedRepository.save(
 								Feed.builder()
 										.channelId(channel.id())
 										.url(url)
 										.build()
-						);
-					});
+						)
+				);
+	}
 
-			Feed.Builder feedBuilder = feed.toBuilder();
+	private void handleResponse(
+			Channel channel,
+			Feed feed,
+			Feed.Builder feedBuilder,
+			ClassicHttpResponse response,
+			HttpCacheContext context
+	) throws IOException {
+		applyCacheHeaders(response, feedBuilder);
+		logCacheResponseStatus(context.getCacheResponseStatus());
 
-			executeHttpRequest(feed, (response, context) -> {
-
-				silentGetHeader(response, "ETag").map(Header::getValue)
-						.ifPresent(etag -> {
-							feedBuilder.etag(etag);
-						});
-
-				silentGetHeader(response, "Last-Modified").map(Header::getValue)
-						.ifPresent(lastModified -> {
-							feedBuilder.lastModified(lastModified);
-						});
-
-				silentGetHeader(response, "Cache-Control").map(Header::getValue)
-						.ifPresent(cacheControl -> {
-							log.info("cache-control {}", cacheControl);
-						});
-
-				CacheResponseStatus responseStatus = context
-						.getCacheResponseStatus();
-				switch (responseStatus) {
-				case CACHE_HIT:
-					log.info(
-							"A response was generated from the cache with "
-									+ "no requests sent upstream"
-					);
-					break;
-				case CACHE_MODULE_RESPONSE:
-					log.info(
-							"The response was generated directly by the "
-									+ "caching module"
-					);
-					break;
-				case CACHE_MISS:
-					log.info("The response came from an upstream server");
-					break;
-				case VALIDATED:
-					log.info(
-							"The response was generated from the cache "
-									+ "after validating the entry with the origin server"
-					);
-					break;
-				case FAILURE:
-					log.info(
-							"The response came from an upstream server after a cache failure"
-					);
-					break;
-				default:
-					break;
-				}
-
-				if (response.getCode() == 304) {
-					log.info("skipped since it was not modified: {}", feed);
-					return;
-				}
-
-				var articles = new RssReader()
-						.read(response.getEntity().getContent())
-						.map(item -> toFeedItem(item, channel))
-						.filter(item -> {
-							if (channel.categories() == null
-									|| channel.categories().isEmpty()) {
-								return true;
-							}
-							for (String category : item.categories()) {
-								if (channel.categories().contains(category)) {
-									return true;
-								}
-							}
-							return false;
-						})
-						.filter(item -> {
-							if (item.published() != null) {
-								return item.published().isAfter(CUTOFF_DATE);
-							}
-							return true;
-						})
-						.map(feedItemRepository::mergeByGuid)
-						.map(item -> item.title())
-						.toList();
-				log.info("got these articles from feed {}: {}", feed, articles);
-			});
-
-			feedRepository.save(feedBuilder.build());
+		if (response.getCode() == 304) {
+			log.info("skipped since it was not modified: {}", feed);
+			return;
 		}
 
-		if (rssToMailProperties.mailSendingEnabled()) {
-			while (feedItemProcessor
-					.processMails(channel, config.from(), config.to())) {
+		logArticles(channel, feed, response);
+	}
+
+	private void applyCacheHeaders(
+			ClassicHttpResponse response,
+			Feed.Builder feedBuilder
+	) {
+		silentGetHeader(response, "ETag").map(Header::getValue)
+				.ifPresent(feedBuilder::etag);
+
+		silentGetHeader(response, "Last-Modified").map(Header::getValue)
+				.ifPresent(feedBuilder::lastModified);
+
+		silentGetHeader(response, "Cache-Control").map(Header::getValue)
+				.ifPresent(
+						cacheControl -> log
+								.info("cache-control {}", cacheControl)
+				);
+	}
+
+	private void logCacheResponseStatus(CacheResponseStatus responseStatus) {
+		switch (responseStatus) {
+		case CACHE_HIT:
+			log.info(
+					"A response was generated from the cache with "
+							+ "no requests sent upstream"
+			);
+			break;
+		case CACHE_MODULE_RESPONSE:
+			log.info(
+					"The response was generated directly by the "
+							+ "caching module"
+			);
+			break;
+		case CACHE_MISS:
+			log.info("The response came from an upstream server");
+			break;
+		case VALIDATED:
+			log.info(
+					"The response was generated from the cache "
+							+ "after validating the entry with the origin server"
+			);
+			break;
+		case FAILURE:
+			log.info(
+					"The response came from an upstream server after a cache failure"
+			);
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void logArticles(
+			Channel channel,
+			Feed feed,
+			ClassicHttpResponse response
+	) throws IOException {
+		var articles = new RssReader().read(response.getEntity().getContent())
+				.map(item -> toFeedItem(item, channel))
+				.filter(item -> matchesCategories(channel, item))
+				.filter(RssToMailApplication::isAfterCutoff)
+				.map(feedItemRepository::mergeByGuid)
+				.map(FeedItem::title)
+				.toList();
+		log.info("got these articles from feed {}: {}", feed, articles);
+	}
+
+	private static boolean matchesCategories(Channel channel, FeedItem item) {
+		if (channel.categories() == null || channel.categories().isEmpty()) {
+			return true;
+		}
+		for (String category : item.categories()) {
+			if (channel.categories().contains(category)) {
+				return true;
 			}
 		}
+		return false;
+	}
 
+	private static boolean isAfterCutoff(FeedItem item) {
+		if (item.published() != null) {
+			return item.published().isAfter(CUTOFF_DATE);
+		}
+		return true;
+	}
+
+	private void sendMails(Config config, Channel channel) {
+		while (feedItemProcessor
+				.processMails(channel, config.from(), config.to())) {
+			// keep sending until there is nothing left to process
+		}
 	}
 
 	private Optional<Header> silentGetHeader(
