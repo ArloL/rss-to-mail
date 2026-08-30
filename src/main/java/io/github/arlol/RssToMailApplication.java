@@ -15,7 +15,6 @@ import org.apache.hc.core5.http.ProtocolException;
 import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -52,18 +51,28 @@ public class RssToMailApplication implements ApplicationRunner {
 	private final Logger log = LoggerFactory
 			.getLogger(RssToMailApplication.class);
 
-	@Autowired
-	RssToMailProperties rssToMailProperties;
-	@Autowired
-	FeedItemRepository feedItemRepository;
-	@Autowired
-	FeedRepository feedRepository;
-	@Autowired
-	ChannelRepository channelRepository;
-	@Autowired
-	FeedItemProcessor feedItemProcessor;
-	@Autowired
-	CloseableHttpClient httpClient;
+	private final RssToMailProperties rssToMailProperties;
+	private final FeedItemRepository feedItemRepository;
+	private final FeedRepository feedRepository;
+	private final ChannelRepository channelRepository;
+	private final FeedItemProcessor feedItemProcessor;
+	private final CloseableHttpClient httpClient;
+
+	public RssToMailApplication(
+			RssToMailProperties rssToMailProperties,
+			FeedItemRepository feedItemRepository,
+			FeedRepository feedRepository,
+			ChannelRepository channelRepository,
+			FeedItemProcessor feedItemProcessor,
+			CloseableHttpClient httpClient
+	) {
+		this.rssToMailProperties = rssToMailProperties;
+		this.feedItemRepository = feedItemRepository;
+		this.feedRepository = feedRepository;
+		this.channelRepository = channelRepository;
+		this.feedItemProcessor = feedItemProcessor;
+		this.httpClient = httpClient;
+	}
 
 	private static final OffsetDateTime CUTOFF_DATE = OffsetDateTime
 			.of(2022, 12, 1, 8, 0, 0, 0, ZoneOffset.ofHours(+1));
