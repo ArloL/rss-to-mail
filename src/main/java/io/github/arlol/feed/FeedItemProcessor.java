@@ -1,5 +1,6 @@
 package io.github.arlol.feed;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.mail.SimpleMailMessage;
@@ -22,7 +23,7 @@ public class FeedItemProcessor {
 	}
 
 	@Transactional
-	public boolean processMails(Channel channel, String from, String[] to) {
+	public boolean processMails(Channel channel, String from, List<String> to) {
 		Optional<FeedItem> optItem = feedItemRepository
 				.findFirstByChannelIdAndProcessedIsFalse(channel.id());
 		if (optItem.isPresent()) {
@@ -43,7 +44,7 @@ public class FeedItemProcessor {
 
 			SimpleMailMessage message = new SimpleMailMessage();
 			message.setFrom(from);
-			message.setTo(to);
+			message.setTo(to.toArray(String[]::new));
 			message.setSubject(subject);
 			message.setText(text);
 			mailSender.send(message);

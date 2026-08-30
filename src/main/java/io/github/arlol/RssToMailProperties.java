@@ -1,6 +1,5 @@
 package io.github.arlol;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,19 +20,13 @@ public record RssToMailProperties(
 
 	public static record Config(
 			String from,
-			String[] to,
+			List<String> to,
 			List<Channel> channels
 	) {
 
 		public Config {
-			to = Optional.ofNullable(to).orElse(new String[0]);
+			to = Optional.ofNullable(to).orElse(List.of());
 			channels = Optional.ofNullable(channels).orElse(List.of());
-		}
-
-		@Override
-		public String toString() {
-			return "Config [from=" + from + ", to=" + Arrays.toString(to)
-					+ ", channels=" + channels + "]";
 		}
 
 	}
